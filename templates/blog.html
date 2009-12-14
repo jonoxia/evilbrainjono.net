@@ -1,0 +1,44 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+  <head>
+    <title>${title}</title>
+    <link rel="stylesheet" type="text/css" href="/jono.css"/>
+  </head>
+  <body>
+    <div class="title">
+      <div class="left-title">
+        <a href="/blog"><img src="/images/Jono-header1.jpg" width="600" height="281" alt="masthead"/></a>
+	<ul>
+	<li>Email me at <a href="mailto:ebjono@gmail.com">ebjono@gmail.com</a></li>
+        <li><a href="/jono.rss">Subscribe (Articles)</a></li>
+	<li><a href="/comments.rss">Subscribe (Comments)</a></li>
+	${actionlinks}
+	</ul>
+      </div>
+      <div class="navigation">
+        <a href="/yuki"><img src="/images/yuki_banner.jpg"/><br/>
+	My webcomic</a><br/>
+  	<a href="http://jonoscript.wordpress.com"><img src="/images/jonoscript_banner.jpg"/><br/>
+        My other blog for Mozilla and UI stuff</a><br/>
+	<a href="/music">Online Music Tools</a>
+      </div>
+    </div>
+    <br clear="all"/>
+
+    <div class="sidebar">
+      ${categorylinks}
+      ${archivelinks}
+    </div>
+    <div class="contents">
+      ${contents}
+      <p>
+        <a href="http://feedvalidator.org/check.cgi?url=http://www.evilbrainjono.net/jono.rss">
+          <img src="/images/valid-rss.png" 
+               alt="[Valid RSS]" title="Validate my RSS feed" width="88" height="31" />
+        </a>
+      </p>
+    </div>
+  </body>
+</html>

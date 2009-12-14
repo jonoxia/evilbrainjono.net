@@ -1,0 +1,11 @@
+<p>Text you enter here will be displayed as-is.  That means that HTML tags will not work.  They will be displayed literally.  Sorry, guys, but this is a security measure to prevent sneaky hackers (like Aza and Stephen) from pasting in evil chunks of Javascript and doing cross-site scripting attacks.</p>
+<form action="/blog/new" method="post">
+  <input type=hidden name="type" value="${type}">
+  <input type=hidden name="original" value="${original}">
+  <input type=hidden name="editid" value="${editid}">
+  <a name="form">Title:</a><input type="text" name="title" value="${title}" size="32"/><br/>
+  Message:<br/>
+  <textarea name="message" rows=20 cols=64>${text}</textarea><br/>
+  ${extras}
+  <input type="submit" name="submission" value="Blog Away!"/>
+</form>
