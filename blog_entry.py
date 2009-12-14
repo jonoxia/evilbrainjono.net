@@ -141,6 +141,8 @@ def get_current_arpadate():
 
 
 def update_rss(title, description, link, rssFile):
+    # TODO note this function depends on having the rss file skeleton in place already -- it can't
+    # regenerate it from scratch.  That seems like a poor choice.
     title = rssclean(title)
     description = rssclean(description)
     arpadate = get_current_arpadate()
