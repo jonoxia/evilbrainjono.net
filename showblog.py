@@ -58,12 +58,12 @@ def make_entry_action_links(username, entry):
         linkHtml += "<a href=\"/blog/login\">Login to Leave a Comment</a>\n"
     return linkHtml
 
-def make_action_links(username, showcomments):
+def make_action_links(username, showcomments, q):
     action_links = ""
     if  showcomments == 'false':
-        action_links += "<li><a href=\"/blog?showcomments=true\">Show Comments</a></li>"
+        action_links += "<li><a href=\"%s\">Show Comments</a></li>" % show_comments_url(q, True)
     else:
-        action_links += "<li><a href=\"/blog?showcomments=false\">Hide Comments</a></li>"
+        action_links += "<li><a href=\"%s\">Hide Comments</a></li>" % show_comments_url(q, False)
     if not username:
         action_links += "<li><a href=\"/blog/login\">Login</a></li>"
     else:
@@ -76,6 +76,17 @@ def make_action_links(username, showcomments):
         action_links += "<li>Hi %s!  How you doin?  Glad you could make it.  Jono would be right happy if you left him some comments.</li>" % username
 
     return action_links
+
+def show_comments_url(q, showComments = True):
+    # Preserve all other arguments to the query (to preseve the location) but turn on comments:
+    if showComments:
+        url = "/blog?showcomments=true"
+    else:
+        url = "/blog?showcomments=false"
+    for argName in ["tag", "month", "year", "permalink"]:
+        if q.has_key(argName):
+            url += "&%s=%s" % (argName, q[argName].value)
+    return url
 
 def make_entry_tags_links(entry, showcomments):
     tagPicsHtml = ""
@@ -179,7 +190,8 @@ def renderMainBlogPage():
         else:
             commentsHtml = ""
             numComments = BlogComment.selectBy(original_post = entry.id).count()
-            featureHtml = "<a href=\"/blog?showcomments=true#%dc\">%d comments</a> | " % (entry.id, numComments)
+            commentLinkUrl = show_comments_url(q) + "#%dc" % entry.id
+            featureHtml = "<a href=\"%s\">%d comments</a> | " % (commentLinkUrl, numComments)
 
         tagPicsHtml = make_entry_tags_links(entry, showcomments)
         featureHtml += make_entry_action_links(username, entry)
@@ -199,7 +211,7 @@ def renderMainBlogPage():
 
     substitution_dict["contents"] = content
     substitution_dict["navigation"] = ""
-    substitution_dict["actionlinks"] = make_action_links(username, showcomments)
+    substitution_dict["actionlinks"] = make_action_links(username, showcomments, q)
     substitution_dict["categorylinks"] = pageContentLinks + make_tag_links(showcomments)
     substitution_dict["archivelinks"] = make_month_links(showcomments)
     print render_template_file( "blog.html", substitution_dict )
