@@ -50,12 +50,13 @@ def make_tag_links(showcomments):
 
 def make_entry_action_links(username, entry):
     linkHtml = ""
-    if username:
-        linkHtml += "<a href=\"blog/new?type=comment&original=%d#form\">Leave a Comment</a>\n" % entry.id
-        if username == 'Jono':
-            linkHtml += " | <a href=\"blog/new?type=editentry&editid=%d\">Edit this Entry</a>\n" % entry.id
-    else:
-        linkHtml += "<a href=\"/blog/login\">Login to Leave a Comment</a>\n"
+    if username == 'Jono':
+        linkHtml += " <a href=\"blog/new?type=editentry&editid=%d\">Edit this Entry</a>\n" % entry.id
+
+    if not username:
+        linkHtml += "<a href=\"blog/login\">Register to leave comments</a>\n"
+
+
     return linkHtml
 
 def make_action_links(username, showcomments, q):
@@ -185,7 +186,7 @@ def renderMainBlogPage():
     content = ""
     for entry in entries:
         if (showcomments == "true"):
-            commentsHtml = show_comments_for_entry(entry.id)
+            commentsHtml = show_comments_for_entry(entry.id, q)
             featureHtml = ""
         else:
             commentsHtml = ""

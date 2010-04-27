@@ -6,6 +6,8 @@ CSS_FILE = os.path.join( BASE_PATH, "comic_styles.css" )
 
 # Constant HTML chunks:
 
+# TODO move all this to the template system
+
 MIGHTY_HEAD_CHUNK = """
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -40,7 +42,7 @@ CONTENTS_BUTTON_CHUNK = """
 MORE_BUTTONS_CHUNK = """
 <a href="/yuki">Latest</a> |
 <a href="/blog">Weblog</a> |
-<a href="/">Front page</a> | 
+<a href="/yuki.rss">Subscribe (RSS)</a>
 """
 INFO_CHUNK = """
 <small>Page %s / %s, %s</small>.
@@ -90,7 +92,7 @@ TOP_OF_COMMENTS_CHUNK = """
 COMMENT_FORM_CHUNK = """
 <div class="comment_form">
 <a name="comment_form" />
-<form action="leave-comic-comment.cgi" method="POST">
+<form action="/leave-comic-comment.py" method="POST">
 <h2>Leave A Comment:</h2>
 <h2 class="error">%(errorMsg)s</h2>
 <input type="hidden" name="pageId" value="%(pageId)d" />
@@ -111,7 +113,7 @@ Password: <input type="password" name="password" />
 LOGGED_IN_COMMENT_FORM_CHUNK = """
 <div class="comment_form">
 <a name="comment_form" />
-<form action="leave-comic-comment.cgi" method="POST">
+<form action="/leave-comic-comment.py" method="POST">
 <h2>Hello, %(defaultUsername)s</h2>
 <h2>Leave A Comment:</h2>
 <h2 class="error">%(errorMsg)s</h2>
@@ -135,6 +137,6 @@ CREATIVE_COMMONS_IMG_CHUNK = """
 CREATIVE_COMMONS_TEXT_CHUNK = """
 <div style="font-size:10pt;text-align:center;">
 <span xmlns:dc="http://purl.org/dc/elements/1.1/" href="http://purl.org/dc/dcmitype/StillImage" property="dc:title" rel="dc:type">Yuki Hoshigawa and the Scariest Thing in the World</span> by 
-<a xmlns:cc="http://creativecommons.org/ns#" href="http://www.evilbrainjono.net" property="cc:attributionName" rel="cc:attributionURL">Jono DiCarlo</a> is licensed under a 
+<a xmlns:cc="http://creativecommons.org/ns#" href="http://www.evilbrainjono.net" property="cc:attributionName" rel="cc:attributionURL">Jono S. Xia</a> is licensed under a 
 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-Share Alike 3.0 Unported License</a>.</div>
 """

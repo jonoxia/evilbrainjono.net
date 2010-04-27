@@ -8,6 +8,8 @@ from model import *
 from constants import *
 from common_utils import *
 
+# TODO use templates instead of MIGHTY_HEAD_CHUNK.
+
 def printHeader( page ):
     print "Content-type: text/html\n\n"
 

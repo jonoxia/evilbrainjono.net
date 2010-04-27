@@ -13,6 +13,7 @@ class BlogEntry( SQLObject ):
     words = StringCol()
     title = StringCol()
     public = BoolCol(default = True)
+    comments_disabled = BoolCol(default = False)
 
 class BlogTag( SQLObject ):
     class sqlmeta:

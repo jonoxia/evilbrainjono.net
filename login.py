@@ -25,6 +25,7 @@ NO_PASSWD_GIVEN_ERR = """<h2>You didn't supply a password.</h2>
 <p>Try again.</p>"""
 NO_PASSWD2_GIVEN_ERR = """<h2>You didn't confirm the password.</h2>
 <p>Try again.</p>"""
+NO_CRUMPETS_ERR ="""<h2>You didn't type 'crumpets'.  Are you sure you're not a spambot?</h2>"""
 
 # TODO implement open_id so people don't have to create an account.
 
@@ -42,6 +43,10 @@ def check_create_ok(q):
         email = q['email'].value
     else:
         email = ""
+    if not q.has_key('turing'):
+        return NO_CRUMPETS_ERR
+    if q['turing'].value != "crumpets":
+        return NO_CRUMPETS_ERR
 
     matchingUsers = User.selectBy( username = username )
     if matchingUsers.count() != 0:
