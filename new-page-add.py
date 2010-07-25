@@ -5,8 +5,8 @@ from common_utils import update_rss
 import datetime
 
 # Config: Edit this stuff.  TODO: Replace with web form.
-TITLE = "THIS IS A PEN"
-IMG_FILE_NAME = "chapter1/office_scene_3/english"
+TITLE = "Monday"
+IMG_FILE_NAME = "chapter1/monday_final"
 SUFFIX = ".jpg"
 
 # Determine sequence number for comic
@@ -21,6 +21,7 @@ ComicPage( sequence = seq,
       fullText = """
 todo
 """,
+      customHtml = "<img src=\"/images/yuki/chapter1/monday_final.jpg\" width=\"1155\" height=\"1452\"/>",
       baseImageFile = IMG_FILE_NAME,
       suffix = SUFFIX
 )

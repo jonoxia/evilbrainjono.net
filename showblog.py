@@ -215,6 +215,8 @@ def renderMainBlogPage():
     substitution_dict["actionlinks"] = make_action_links(username, showcomments, q)
     substitution_dict["categorylinks"] = pageContentLinks + make_tag_links(showcomments)
     substitution_dict["archivelinks"] = make_month_links(showcomments)
+    substitution_dict["twitterlinks"] = links_from_rss_feed(TWITTER_FEED)
+    substitution_dict["jonoscriptlinks"] = links_from_rss_feed(JONOSCRIPT_FEED)
     print render_template_file( "blog.html", substitution_dict )
 
 

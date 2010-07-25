@@ -7,6 +7,7 @@ import model
 import datetime
 import string
 import base64
+import feedparser
 from urllib import urlencode
 from Cookie import SimpleCookie
 
@@ -18,6 +19,9 @@ LOGIN_PAGE_URL = "/blog/login"
 BASE_BLOG_URL = "http://evilbrainjono.net/blog"
 CSS_URL = "/jono.css"
 TEMPLATE_DIR = "/var/www/templates"
+
+TWITTER_FEED = "http://twitter.com/statuses/user_timeline/164093116.rss"
+JONOSCRIPT_FEED = "http://jonoscript.wordpress.com/feed/"
 
 # Error messages:
 NEED_FIELD_ERR = "You left a required field blank."
@@ -219,3 +223,15 @@ def rssclean(input):
     # Strip out all remaining html tags, replace with spaces.
     input = re.compile("<[^>]+?>").sub(" ", input) 
     return input
+
+def links_from_rss_feed(url):
+    f = feedparser.parse(url)
+    rss_links = "<h4><a href=\"%s\">%s</a></h4><ul>" % (f.feed.link, f.feed.title)
+    entries = [e for e in f.entries if not ("evilbrainjono.net" in e.title)]
+    for entry in entries[0:5]:
+        if "twitter.com" in url:
+            rss_links += "<li>%s</li>" % re.sub(r'^jonoxia: ', "", entry.title)
+        else:
+            rss_links += "<li><a href=\"%s\">%s</a></li>" % (entry.link, entry.title)
+    rss_links += "</ul>"
+    return rss_links.encode("utf-8")
