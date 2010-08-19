@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import re
 import cgi
 import cgitb
@@ -7,7 +8,7 @@ from model import *
 
 cgitb.enable()
 
-def make_form(type, original, editid, username):
+def make_form(type, editid, username):
     default_text = ""
     default_title = ""
     if type == "editentry":
@@ -15,7 +16,6 @@ def make_form(type, original, editid, username):
         default_text = oldEntry.words
         default_title = oldEntry.title
     dict = {"type": type,
-            "original": original,
             "editid": editid,
             "title": default_title,
             "text": default_text,
@@ -105,21 +105,11 @@ def printBlogEntryForm():
     else:
         username = None
 
-    if q.has_key("type"):
-        type = q["type"].value
-    else:
-        type = None
-    if q.has_key("original"):
-        original = q["original"].value
-    else:
-        original = None
-    if q.has_key("editid"):
-        editid = q["editid"].value
-    else:
-        editid = None
+    if username != "Jono":
+        print_redirect("/blog")
 
-    if not username:
-        print_redirect(LOGIN_PAGE_URL)
+    type = q.getfirst("type", "")
+    editid = q.getfirst("editid", "")
 
     if q.has_key("submission"):
         if type == "editentry":
@@ -128,26 +118,22 @@ def printBlogEntryForm():
             add_submission(q, username, type, original)
         print_redirect("/blog")
 
-    if (type == "entry" or type == "editentry") and username != "Jono":
-        print_redirect("/blog")
-
     contentHtml = ""
-    if type == "comment":
-        contentHtml += "<h2>" + username + " is adding a comment.  Below is the original blog entry.  Below that is the comment form.</h2>"
-        contentHtml += print_original_entry(original)
-    elif type == "editentry":
+    if type == "editentry":
         contentHtml +=  "Jono is editing old entry id " + editid + " : "
     else:
         contentHtml += "Jono is making a new entry: "
 
-    contentHtml += make_form(type, original, editid, username)
+    contentHtml += make_form(type, editid, username)
     
-    print render_template_file("blog.html", {"title": "Jono's Natural Log -- Leave Comments",
+    print render_template_file("blog.html", {"title": "Jono's Natural Log -- Make Entry",
                                              "contents": contentHtml,
                                              "navigation": "",
                                              "archivelinks": "",
                                              "actionlinks": "",
-                                             "categorylinks": ""
+                                             "categorylinks": "",
+                                             "jonoscriptlinks": "",
+                                             "twitterlinks": ""
                                              })
 
 

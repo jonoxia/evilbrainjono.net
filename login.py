@@ -103,7 +103,9 @@ dict = {"title": "Jono's Natural Login",
         "navigation": "",
         "actionlinks": "",
         "categorylinks": "",
-        "archivelinks": ""}
+        "archivelinks": "",
+        "jonoscriptlinks": "",
+        "twitterlinks": ""}
 
 dict["contents"] = render_template_file( "login_form.html", {"error": error_message,
                                                              "action": "/blog/login"} )
