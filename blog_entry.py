@@ -8,8 +8,8 @@ from model import *
 
 cgitb.enable()
 
-def make_form(type, editid, username):
-    default_text = ""
+def make_form(type, editid, username, newText):
+    default_text = newText
     default_title = ""
     if type == "editentry":
         oldEntry = get_old_entry(editid)
@@ -43,7 +43,7 @@ def print_original_entry(id):
                                                           "tagpics": ""})
     return entryHtml
 
-def add_submission(q, username, type, original):
+def add_submission(q, username, type):
     if q.has_key("message"):
         words = q["message"].value
     else:
@@ -93,9 +93,23 @@ def commit_edit(q, username, editid):
         theEntry = get_old_entry(editid)
         theEntry.words = words
 
+def do_upload(fileItem, username):
+    dir = "expo2010" # TODO make this choice part of web interface
+    if fileItem.filename and username == "Jono":
+        name = os.path.basename(fileItem.filename)
+        path = os.path.join("/var/www/images", dir)
+        path = os.path.join(path, name)
+        outfile = open(path, "wb")
+        data = fileItem.file.read()
+        outfile.write(data)
+        outfile.close()
+        return "<img src=\"/images/%s/%s\">" % (dir, name)
+    else:
+        if not fileItem.filename:
+            return "Can't upload, file is null"
+        if username != "Jono":
+            return "Can't upload, invalid user"
 
-# TODO leaving comments is going to be handled by leave-blog-comment.py, so we can take out the
-# comment-leaving options from this file.
 def printBlogEntryForm():
     q = cgi.FieldStorage()
 
@@ -115,8 +129,19 @@ def printBlogEntryForm():
         if type == "editentry":
             commit_edit(q, username, editid)
         else:
-            add_submission(q, username, type, original)
+            add_submission(q, username, type)
         print_redirect("/blog")
+
+    if q.has_key("upload") and q.has_key("file1"):
+        dbug = q["file1"]
+        newText = ""
+        attrs = dir(dbug)
+        for a in attrs:
+            newText += "%s = %s; " % (a, getattr(dbug, a))
+        #imgLink = do_upload(q["file1"], username)
+        #newText = q.getfirst("text", "") + "\n\n" + imgLink
+    else:
+        newText = ""
 
     contentHtml = ""
     if type == "editentry":
@@ -124,7 +149,7 @@ def printBlogEntryForm():
     else:
         contentHtml += "Jono is making a new entry: "
 
-    contentHtml += make_form(type, editid, username)
+    contentHtml += make_form(type, editid, username, newText)
     
     print render_template_file("blog.html", {"title": "Jono's Natural Log -- Make Entry",
                                              "contents": contentHtml,
