@@ -225,8 +225,11 @@ def rssclean(input):
     return input
 
 def links_from_rss_feed(url):
-    f = feedparser.parse(url)
-    rss_links = "<h4><a href=\"%s\">%s</a></h4><ul>" % (f.feed.link, f.feed.title)
+    try:
+        f = feedparser.parse(url)
+        rss_links = "<h4><a href=\"%s\">%s</a></h4><ul>" % (f.feed.link, f.feed.title)
+    except:
+        return ""
     entries = [e for e in f.entries if not ("evilbrainjono.net" in e.title)]
     for entry in entries[0:5]:
         if "twitter.com" in url:
