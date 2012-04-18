@@ -1,0 +1,17 @@
+<html>
+<head>
+<title>Pic Uploader</title>
+<link rel="stylesheet" href="pic-uploader.css" type="text/css"></link>
+<script src="jquery.js"></script>
+<script src="pic-uploader.js"></script>
+</head>
+<body onkeydown="handleKeypress">
+Name of picture set: <input type="text" id="pic-set-name"></input> Files:
+<input type="file" id="input" multiple onchange="handleFiles(this.files)"/>
+<span id="output"></span>
+<hr/>
+<div><canvas id="preview-canvas" width="600" height="800"></canvas></div>
+<div>Alt text for image: <input type="text" id="alt-text"></input><br/>
+Caption for image: <textarea id="caption" rows="30" cols="40"></textarea></div>
+</body>
+</html>
