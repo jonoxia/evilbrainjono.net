@@ -13,7 +13,9 @@
 		    altText: "",
 		    caption: "",
 		    img: null,
-		    id: i
+		    id: i,
+		    offsetX: 0,
+		    offsetY: 0
                            });
     }
     previewFile();
@@ -38,11 +40,11 @@
 	ctx.clearRect(0, 0, 600, 800);
         ctx.save();
         ctx.translate(300, 400);
+	ctx.translate(metadata.offsetX, metadata.offsetY);
 	ctx.rotate(metadata.rotation * Math.PI / 2);
+        ctx.translate(-300, -400);
         ctx.scale(metadata.scale, metadata.scale);
-        ctx.drawImage(metadata.img,
-		      0 - metadata.width/2,
-		      0 - metadata.height/2);
+        ctx.drawImage(metadata.img, 0, 0);
 	ctx.restore();
     }
 
@@ -132,6 +134,8 @@
     var canvas = document.getElementById("preview-canvas");    
     var picSet = document.getElementById("pic-set-name").value;
 
+    metadata.altText = document.getElementById("alt-text").value;
+    metadata.caption = document.getElementById("caption").value;
 
     // Client side TODOs: 
     // TODO set bounding box before doing toDataURL so we don't pick up whitespace
@@ -140,6 +144,7 @@
     // TODO show status of all ongoing uploads while allowing user to move on to next
     // picture and start writing a caption there.
     // TODO why is it taking so long?
+    // TODO it's picking up incorrect width and height properties for some reason.
     var bbox = {};
     if (metadata.rotation == 1 || metadata.rotation == 3) {
 	bbox.width = Math.floor( metadata.height * metadata.scale + 0.5);
@@ -148,10 +153,9 @@
 	bbox.width = Math.floor( metadata.width * metadata.scale + 0.5);
 	bbox.height = Math.floor( metadata.height * metadata.scale + 0.5);
     }
+    console.log("width = " + bbox.width + ", height = " + bbox.height);
 
     var dataUrl = canvas.toDataURL("image/jpg"); // will this throw exception?
-    output("Uploading image and caption...");
-    console.log(dataUrl);
     
     var postArgs = {
         filename: metadata.id,
@@ -162,6 +166,9 @@
 	height: bbox.height,
 	img: dataUrl
     };
+    output("Uploading image and caption... " + postArgs.caption);
+    var progressMeter = $("<li>Uploading image " + metadata.id + " ...</li>");
+    $("#in-progress").append(progressMeter);
 
     jQuery.ajax({url:"pic-uploader.py",
 		data: postArgs,
@@ -170,10 +177,11 @@
                   output("Success");
 		  metadata.uploaded = true; // TODO use this to display
 		                              //loaded msg
-		  output(data);
+		  progressMeter.remove();
 	        },
 		error: function(req, textStatus, error) {
                   output("Failed: " + error);
+		  progressMeter.remove();
 	        },
 		dataType: "html"});    
     // TODO show progress bar.
@@ -216,5 +224,37 @@
         }
       }
   }
-  
-document.addEventListener("keydown", handleKeypress, false);
+
+var mouseDownLoc = {x: 0, y: 0};
+var mouseIsDown = false;
+
+function canvasMouseDown(e) {
+    mouseDownLoc.x = e.pageX;
+    mouseDownLoc.y = e.pageY;
+    mouseIsDown = true;
+}
+
+function canvasMouseMove(e) {
+    if (mouseIsDown) {
+    var dx = e.pageX - mouseDownLoc.x;
+    var dy = e.pageY - mouseDownLoc.y;
+    var metadata = g_file_metadata[g_fileIndex];
+    metadata.offsetX += dx;
+    metadata.offsetY += dy;
+    previewFile();
+    mouseDownLoc.x = e.pageX;
+    mouseDownLoc.y = e.pageY;
+    }
+}
+
+function canvasMouseUp(e) {
+    mouseIsDown = false;
+}
+
+$(document).ready(function() {  
+	$(document).bind("keydown", handleKeypress);
+	$("#preview-canvas").bind("mousedown", canvasMouseDown);
+	$("#preview-canvas").bind("mouseup", canvasMouseUp);
+	$("#preview-canvas").bind("mousemove", canvasMouseMove);
+    });
+

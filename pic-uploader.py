@@ -45,10 +45,22 @@ html = render_template_file("pic.html", {"url": url,
                                    "height": height,
                                    "width": width,
                                    "caption": caption})
-# TODO create a preview-posts table in database; on each upload,
+
+# create a preview-posts table in database; on each upload,
 # append the html oputput of the templating operation into that preview
 # use directory as name of new preview; if matching name exists append to it, if not
 # create it.
+draft = BlogEntry.selectBy( title = directory, public = False )
+if draft.count() == 0:
+  kwargs = {"date": datetime.datetime.now(),
+            "title": directory,
+            "public": False,
+            "words": html}
+  draft = BlogEntry(**kwargs)
+else:
+  draft = draft[0]
+  draft.words = draft.words + html
+  
 
 # TODO create a page where the preview can be viewed and edited before publishing
 
