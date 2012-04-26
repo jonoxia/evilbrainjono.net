@@ -65,15 +65,7 @@ def add_submission(q, username, type):
                   "words": fullText}
         newEntry = BlogEntry(**kwargs)
         if q.has_key("tags"):
-            tagNames = q["tags"].value.split(",")
-            for tagName in tagNames:
-                tagName = tagName.strip(" ")
-                blogTag = BlogTag.selectBy( name = tagName )
-                if blogTag.count() == 0:
-                    blogTag = BlogTag( name = tagName )
-                else:
-                    blogTag = blogTag[0]
-                EntryToTagLink(entry = newEntry.id, tag = blogTag.id)
+            make_tags_for_entry(newEntry, q["tags"].value)
 
         link = "http://evilbrainjono.net/blog#%d" % newEntry.id
         if len(more_words) > 0:

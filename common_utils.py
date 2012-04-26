@@ -238,3 +238,14 @@ def links_from_rss_feed(url):
             rss_links += "<li><a href=\"%s\">%s</a></li>" % (entry.link, entry.title)
     rss_links += "</ul>"
     return rss_links.encode("utf-8")
+
+def make_tags_for_entry(newEntry, tags):
+    tagNames = tags.split(",")
+    for tagName in tagNames:
+        tagName = tagName.strip(" ")
+        blogTag = model.BlogTag.selectBy( name = tagName )
+        if blogTag.count() == 0:
+            blogTag = BlogTag( name = tagName )
+        else:
+            blogTag = blogTag[0]
+        model.EntryToTagLink(entry = newEntry.id, tag = blogTag.id)

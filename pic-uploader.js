@@ -25,7 +25,7 @@
     document.getElementById("output").innerHTML = text;
   }
 
-  function previewFile() {
+  function drawFile(canvas) {
     var nextFile = g_files[g_fileIndex];
     var imageType = /image.*/;
     if (!nextFile.type.match(imageType)) {  
@@ -34,7 +34,7 @@
     }
 
     var metadata = g_file_metadata[g_fileIndex];
-    var ctx = document.getElementById("preview-canvas").getContext("2d");
+    var ctx = canvas[0].getContext("2d");
 
     function drawIt(metadata) {
 	ctx.clearRect(0, 0, 600, 800);
@@ -71,6 +71,10 @@
       reader.readAsDataURL(nextFile);
     }
   }
+
+function previewFile() {
+    drawFile($("#preview-canvas"));
+}
 
   function nextFile() {
     if (g_fileIndex >= g_files.length) {
@@ -131,7 +135,6 @@
   function uploadImage() {
     output("Converting image...");
     var metadata = g_file_metadata[g_fileIndex];
-    var canvas = document.getElementById("preview-canvas");    
     var picSet = document.getElementById("pic-set-name").value;
 
     metadata.altText = document.getElementById("alt-text").value;
@@ -154,9 +157,15 @@
 	bbox.height = Math.floor( metadata.height * metadata.scale + 0.5);
     }
     console.log("width = " + bbox.width + ", height = " + bbox.height);
-
-    var dataUrl = canvas.toDataURL("image/jpg"); // will this throw exception?
     
+    var exportCanvas = $("<canvas></canvas>");
+    exportCanvas.attr("width", bbox.width);
+    exportCanvas.attr("height", bbox.height);
+    $("#export-area").append(exportCanvas);
+    drawFile(exportCanvas);
+    var dataUrl = exportCanvas[0].toDataURL("image/jpg");
+    $("#export-area").empty();
+
     var postArgs = {
         filename: metadata.id,
         directory: picSet,
