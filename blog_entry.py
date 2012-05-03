@@ -11,10 +11,13 @@ cgitb.enable()
 def make_form(type, editid, username, newText):
     default_text = newText
     default_title = ""
+    moreWords = ""
     if type == "editentry":
         oldEntry = get_old_entry(editid)
         default_text = oldEntry.words
         default_title = oldEntry.title
+        if oldEntry.more_words != None:
+            moreWords = oldEntry.more_words
     dict = {"type": type,
             "editid": editid,
             "title": default_title,
@@ -22,8 +25,8 @@ def make_form(type, editid, username, newText):
             "extras": ""}
     extrasHtml = ""
     # This part is only for when I'm making an entry, not for comments:
-    if type == "entry" and username == "Jono":
-        extrasHtml += render_template_file( "more_message.html", {} )
+    if (type == "entry" or type== "editentry") and username == "Jono":
+        extrasHtml += render_template_file( "more_message.html", {"more_words": moreWords} )
         dict["extras"] = extrasHtml
     return render_template_file ( "entry_form.html", dict )
 
@@ -58,11 +61,14 @@ def add_submission(q, username, type):
         title = ""
 
     if username == "Jono" and type == "entry":
-        fullText = html_clean(words) + html_clean(more_words)
+        words = html_clean(words)
+        if more_words != "":
+            more_words = html_clean(more_words)
         kwargs = {"date": datetime.datetime.now(),
                   "title": title,
                   "public": True,
-                  "words": fullText}
+                  "words": words,
+                  "more_words": more_words}
         newEntry = BlogEntry(**kwargs)
         if q.has_key("tags"):
             make_tags_for_entry(newEntry, q["tags"].value)
@@ -80,27 +86,12 @@ def add_submission(q, username, type):
         pass
 
 def commit_edit(q, username, editid):
+    # TODO allow this to set title, tags, and more_words
     if username == "Jono":
-        words = html_clean(q["message"].value)
         theEntry = get_old_entry(editid)
-        theEntry.words = words
-
-def do_upload(fileItem, username):
-    dir = "expo2010" # TODO make this choice part of web interface
-    if fileItem.filename and username == "Jono":
-        name = os.path.basename(fileItem.filename)
-        path = os.path.join("/var/www/images", dir)
-        path = os.path.join(path, name)
-        outfile = open(path, "wb")
-        data = fileItem.file.read()
-        outfile.write(data)
-        outfile.close()
-        return "<img src=\"/images/%s/%s\">" % (dir, name)
-    else:
-        if not fileItem.filename:
-            return "Can't upload, file is null"
-        if username != "Jono":
-            return "Can't upload, invalid user"
+        theEntry.words = html_clean(q.getfirst("message", ""))
+        theEntry.title = q.getfirst("title", "")
+        theEntry.more_words = html_clean(q.getfirst("more_message", ""))
 
 def printBlogEntryForm():
     q = cgi.FieldStorage()
@@ -124,17 +115,8 @@ def printBlogEntryForm():
             add_submission(q, username, type)
         print_redirect("/blog")
 
-    if q.has_key("upload") and q.has_key("file1"):
-        dbug = q["file1"]
-        newText = ""
-        attrs = dir(dbug)
-        for a in attrs:
-            newText += "%s = %s; " % (a, getattr(dbug, a))
-        #imgLink = do_upload(q["file1"], username)
-        #newText = q.getfirst("text", "") + "\n\n" + imgLink
-    else:
-        newText = ""
 
+    newText = ""
     contentHtml = ""
     if type == "editentry":
         contentHtml +=  "Jono is editing old entry id " + editid + " : "

@@ -11,6 +11,7 @@ class BlogEntry( SQLObject ):
         defaultOrder = "-date"
     date = DateTimeCol()
     words = StringCol()
+    more_words = StringCol()
     title = StringCol()
     public = BoolCol(default = True)
     comments_disabled = BoolCol(default = False)

@@ -27,3 +27,7 @@ div.tagpics img {float: right; width: 50px; height: 50px;}
 
 .imgset { float: left;}
 .caption { font: small caption; text-align: center; margin: 0.5em; }
+
+div.unfold-div { display: none; }
+
+a.unfold-link {color: blue; text-align: center; text-decoration: underline;}

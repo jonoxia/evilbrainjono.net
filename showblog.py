@@ -196,10 +196,14 @@ def renderMainBlogPage():
 
         tagPicsHtml = make_entry_tags_links(entry, showcomments)
         featureHtml += make_entry_action_links(username, entry)
+        moreWords = ""
+        if (entry.more_words != None) and (entry.more_words != ""):
+            moreWords = render_template_file( "more_words.html", { "morewords": entry.more_words })
         entryHtml = render_template_file( "blog_entry.html", { "id": entry.id,
                                                                "title": entry.title,
                                                                "date": entry.date.strftime("%a, %d %b %Y %H:%M") ,
                                                                "words": entry.words,
+                                                               "morewords": moreWords,
                                                                "commentarea": commentsHtml,
                                                                "features": featureHtml,
                                                                "tagpics": tagPicsHtml})
