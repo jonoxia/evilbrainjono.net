@@ -196,14 +196,22 @@ def renderMainBlogPage():
 
         tagPicsHtml = make_entry_tags_links(entry, showcomments)
         featureHtml += make_entry_action_links(username, entry)
-        moreWords = ""
+
+        # Is this a long entry, i.e. there's below-the-fold-content?
+        words = entry.words
+        belowTheFold = ""
         if (entry.more_words != None) and (entry.more_words != ""):
-            moreWords = render_template_file( "more_words.html", { "morewords": entry.more_words })
+            if (permalink != 0):
+                # If we're looking at a permalink i.e. single-page view, just show all contents:
+                words += entry.more_words
+            else:
+                # Otherwise hide them below a "read more" link:
+                belowTheFold = render_template_file( "more_words.html", { "morewords": entry.more_words })
         entryHtml = render_template_file( "blog_entry.html", { "id": entry.id,
                                                                "title": entry.title,
                                                                "date": entry.date.strftime("%a, %d %b %Y %H:%M") ,
-                                                               "words": entry.words,
-                                                               "morewords": moreWords,
+                                                               "words": words,
+                                                               "morewords": belowTheFold,
                                                                "commentarea": commentsHtml,
                                                                "features": featureHtml,
                                                                "tagpics": tagPicsHtml})
