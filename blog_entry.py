@@ -3,8 +3,10 @@ import re
 import cgi
 import cgitb
 import datetime
+from tweet import updateTwitterStatus
 from common_utils import *
 from model import *
+from blog_config import ADMIN_USERNAME
 
 cgitb.enable()
 
@@ -28,7 +30,7 @@ def make_form(type, editid, username, newText):
             "extras": ""}
     extrasHtml = ""
     # This part is only for when I'm making an entry, not for comments:
-    if (type == "entry" or type== "editentry") and username == "Jono":
+    if (type == "entry" or type== "editentry") and username == ADMIN_USERNAME:
         extrasHtml += render_template_file( "more_message.html", {"more_words": moreWords,
                                                                   "public_checked": publicChecked} )
         dict["extras"] = extrasHtml
@@ -50,14 +52,30 @@ def print_original_entry(id):
                                                           "tagpics": ""})
     return entryHtml
 
+
+def publicize(q, entry):
+    link = "http://evilbrainjono.net/blog#%d" % newEntry.id
+    doRss = q.getfirst("dorss", "")
+    tweet = q.getfirst("tweet", "")
+
+    if doRss == "yes":
+        if len(more_words) > 0:
+            message = "\n\n This post was really long, so I snipped it.  Read the rest at http://evilbrainjono.net."
+        else:
+            message = "\n\n<a href=\"http://www.evilbrainjono.net/blog/new?type=comment&original=%d#form\">Leave a comment</a>" % newEntry.id
+        update_rss( title, words + message, link, RSS_FILE )
+    if tweet == "yes":
+        message = "New blog post: %s %s" % (entry.title, link)
+        if len(message) <= 140:
+            updateTwitterStatus(message)
+
 def add_submission(q, username, type):
     words = q.getfirst("message", "")
     more_words = q.getfirst("more_message", "")
     title = q.getfirst("title", "")
     public = q.getfirst("public", "")
-    doRss = q.getfirst("dorss", "")
 
-    if username == "Jono" and type == "entry":
+    if username == ADMIN_USERNAME and type == "entry":
         words = html_clean(words)
         if more_words != "":
             more_words = html_clean(more_words)
@@ -70,14 +88,9 @@ def add_submission(q, username, type):
         if q.has_key("tags"):
             make_tags_for_entry(newEntry, q["tags"].value)
 
-        link = "http://evilbrainjono.net/blog#%d" % newEntry.id
-
-        if doRss == "yes":
-            if len(more_words) > 0:
-                message = "\n\n This post was really long, so I snipped it.  Read the rest at http://evilbrainjono.net."
-            else:
-                message = "\n\n<a href=\"http://www.evilbrainjono.net/blog/new?type=comment&original=%d#form\">Leave a comment</a>" % newEntry.id
-            update_rss( title, words + message, link, RSS_FILE )
+        # Let RSS and twitter know about the new post:
+        if public == "yes":
+            publicize(q, newEntry)
 
     else:
         # Can't happen?
@@ -85,12 +98,16 @@ def add_submission(q, username, type):
 
 def commit_edit(q, username, editid):
     # TODO allow this to set/clear tags, too
-    if username == "Jono":
+    if username == ADMIN_USERNAME:
         theEntry = get_old_entry(editid)
         theEntry.words = html_clean(q.getfirst("message", ""))
         theEntry.title = q.getfirst("title", "")
         theEntry.more_words = html_clean(q.getfirst("more_message", ""))
         public = q.getfirst("public", "")
+
+        # If we take a private post and turn it public, announce it! (if i don't want this, uncheck the rss/twitter boxes)
+        if (theEntry.public == False) and (public == "yes"):
+            publicize(q, theEntry)
         theEntry.public = (public == "yes")
 
 def printBlogEntryForm():
@@ -102,7 +119,7 @@ def printBlogEntryForm():
     else:
         username = None
 
-    if username != "Jono":
+    if username != ADMIN_USERNAME:
         print_redirect("/blog")
 
     type = q.getfirst("type", "")

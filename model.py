@@ -1,7 +1,8 @@
 from sqlobject import *
+from blog_config import DB_URL
 import datetime
 
-connection = connectionForURI( "mysql://root:soylentgnome9@localhost/blog" )
+connection = connectionForURI( DB_URL )
 sqlhub.processConnection = connection
 
 # Blog

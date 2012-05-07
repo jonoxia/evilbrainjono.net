@@ -8,6 +8,7 @@ from common_utils import *
 import math
 import datetime
 from sqlobject import AND
+from blog_config import ADMIN_USERNAME
 
 POSTS_PER_PAGE = 12
 
@@ -71,7 +72,7 @@ def make_action_links(username, showcomments, q):
         # TODO logout link never actually worked!  Add that feature.
         action_links += "<li><a href=\"/blog/login\">Logout</a></li>"
 
-    if username == "Jono":
+    if username == ADMIN_USERNAME:
         action_links +=  "<li>Welcome back, Jono.  I have guarded your blog vigilantly while you were away.  Want to <a href=\"blog/new?type=entry\">make a new entry</a>?</li>"
     elif username:
         action_links += "<li>Hi %s!  How you doin?  Glad you could make it.  Jono would be right happy if you left him some comments.</li>" % username

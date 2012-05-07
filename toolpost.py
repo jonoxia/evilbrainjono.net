@@ -6,6 +6,7 @@
 import cgi
 import cgitb
 import blog_entry
+from blog_config import ADMIN_USERNAME, ADMIN_PASSWORD
 
 cgitb.enable()
 q = cgi.FieldStorage()
@@ -13,7 +14,7 @@ q = cgi.FieldStorage()
 username = q.getfirst("username", "")
 password = q.getfirst("password", "")
 # TODO don't hardcode these here, get from a config file or database:
-if username == "Jono" and password == "!Mizuno!":
+if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
     blog_entry.add_submission(q, username, "entry")
     print "Content-type: text/html"
     print
