@@ -12,10 +12,13 @@ def make_form(type, editid, username, newText):
     default_text = newText
     default_title = ""
     moreWords = ""
+    publicChecked = "checked"
     if type == "editentry":
         oldEntry = get_old_entry(editid)
         default_text = oldEntry.words
         default_title = oldEntry.title
+        if not oldEntry.public:
+            publicChecked = ""
         if oldEntry.more_words != None:
             moreWords = oldEntry.more_words
     dict = {"type": type,
@@ -26,7 +29,8 @@ def make_form(type, editid, username, newText):
     extrasHtml = ""
     # This part is only for when I'm making an entry, not for comments:
     if (type == "entry" or type== "editentry") and username == "Jono":
-        extrasHtml += render_template_file( "more_message.html", {"more_words": moreWords} )
+        extrasHtml += render_template_file( "more_message.html", {"more_words": moreWords,
+                                                                  "public_checked": publicChecked} )
         dict["extras"] = extrasHtml
     return render_template_file ( "entry_form.html", dict )
 
@@ -47,18 +51,11 @@ def print_original_entry(id):
     return entryHtml
 
 def add_submission(q, username, type):
-    if q.has_key("message"):
-        words = q["message"].value
-    else:
-        words = ""
-    if q.has_key("more_message"):
-        more_words = q["more_message"].value
-    else:
-        more_words = ""
-    if q.has_key("title"):
-        title = q["title"].value
-    else:
-        title = ""
+    words = q.getfirst("message", "")
+    more_words = q.getfirst("more_message", "")
+    title = q.getfirst("title", "")
+    public = q.getfirst("public", "")
+    doRss = q.getfirst("dorss", "")
 
     if username == "Jono" and type == "entry":
         words = html_clean(words)
@@ -66,7 +63,7 @@ def add_submission(q, username, type):
             more_words = html_clean(more_words)
         kwargs = {"date": datetime.datetime.now(),
                   "title": title,
-                  "public": True,
+                  "public": (public == "yes"),
                   "words": words,
                   "more_words": more_words}
         newEntry = BlogEntry(**kwargs)
@@ -74,24 +71,27 @@ def add_submission(q, username, type):
             make_tags_for_entry(newEntry, q["tags"].value)
 
         link = "http://evilbrainjono.net/blog#%d" % newEntry.id
-        if len(more_words) > 0:
-            message = "\n\n This post was really long, so I snipped it.  Read the rest at http://evilbrainjono.net."
-        else:
-            message = "\n\n<a href=\"http://www.evilbrainjono.net/blog/new?type=comment&original=%d#form\">Leave a comment</a>" % newEntry.id
 
-        update_rss( title, words + message, link, RSS_FILE )
+        if doRss == "yes":
+            if len(more_words) > 0:
+                message = "\n\n This post was really long, so I snipped it.  Read the rest at http://evilbrainjono.net."
+            else:
+                message = "\n\n<a href=\"http://www.evilbrainjono.net/blog/new?type=comment&original=%d#form\">Leave a comment</a>" % newEntry.id
+            update_rss( title, words + message, link, RSS_FILE )
 
     else:
         # Can't happen?
         pass
 
 def commit_edit(q, username, editid):
-    # TODO allow this to set title, tags, and more_words
+    # TODO allow this to set/clear tags, too
     if username == "Jono":
         theEntry = get_old_entry(editid)
         theEntry.words = html_clean(q.getfirst("message", ""))
         theEntry.title = q.getfirst("title", "")
         theEntry.more_words = html_clean(q.getfirst("more_message", ""))
+        public = q.getfirst("public", "")
+        theEntry.public = (public == "yes")
 
 def printBlogEntryForm():
     q = cgi.FieldStorage()
