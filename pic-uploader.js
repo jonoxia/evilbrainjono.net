@@ -77,7 +77,7 @@ function previewFile() {
 }
 
   function nextFile() {
-    if (g_fileIndex >= g_files.length) {
+    if (g_fileIndex >= g_files.length - 1) {
       output("No more files to preview");
       return;
     }
@@ -183,13 +183,13 @@ function previewFile() {
 		data: postArgs,
 		type: "POST",
 		success: function(data, textStatus) {
-                  output("Success");
+                  output(data);
 		  metadata.uploaded = true; // TODO use this to display
 		                              //loaded msg
 		  progressMeter.remove();
 	        },
 		error: function(req, textStatus, error) {
-                  output("Failed: " + error);
+                  output(error);
 		  progressMeter.remove();
 	        },
 		dataType: "html"});    
@@ -219,7 +219,7 @@ function previewFile() {
           rotatePreview();
 	  break;
 	  // ctrl - +
-	case 107:
+	case 107: case 61:
           zoomInPreview();
           break;
          // ctrl - -
