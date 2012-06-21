@@ -21,3 +21,4 @@ print
 print "<a href=\"%s\">Edit This Post</a><br/>" % editLink
 print "<h2>%s</h2>" % draft.title
 print draft.words
+print draft.more_words

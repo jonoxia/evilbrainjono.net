@@ -55,15 +55,16 @@ if draft.count() == 0:
   kwargs = {"date": datetime.datetime.now(),
             "title": directory,
             "public": False,
-            "words": html}
+            "words": "This is a photo gallery.",
+            "more_words": html}
   draft = BlogEntry(**kwargs)
 else:
   draft = draft[0]
-  draft.words = draft.words + html
+  draft.more_words = draft.more_words + html
   
 
 # TODO create a page where the preview can be viewed and edited before publishing
 
 print "Content-type: text/html"
 print
-print html
+print "Saved post as %d" % draft.id

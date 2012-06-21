@@ -31,3 +31,5 @@ div.tagpics img {float: right; width: 50px; height: 50px;}
 div.unfold-div { display: none; }
 
 a.unfold-link {color: blue; text-align: center; text-decoration: underline;}
+
+#hidden-tag-list { display: none; }

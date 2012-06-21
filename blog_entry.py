@@ -31,7 +31,12 @@ def make_form(type, editid, username, newText):
     extrasHtml = ""
     # This part is only for when I'm making an entry, not for comments:
     if (type == "entry" or type== "editentry") and username == ADMIN_USERNAME:
+        # Get list of tags for autocompletion:
+        allTags = BlogTag.select()
+        tagList = ",".join([tag.name for tag in allTags])
+        # add the 'more words' area and the publishing checkboxes:
         extrasHtml += render_template_file( "more_message.html", {"more_words": moreWords,
+                                                                  "tag_list": tagList,
                                                                   "public_checked": publicChecked} )
         dict["extras"] = extrasHtml
     return render_template_file ( "entry_form.html", dict )
@@ -54,16 +59,16 @@ def print_original_entry(id):
 
 
 def publicize(q, entry):
-    link = "http://evilbrainjono.net/blog#%d" % newEntry.id
+    link = "http://evilbrainjono.net/blog#%d" % entry.id
     doRss = q.getfirst("dorss", "")
     tweet = q.getfirst("tweet", "")
 
     if doRss == "yes":
-        if len(more_words) > 0:
+        if len(entry.more_words) > 0:
             message = "\n\n This post was really long, so I snipped it.  Read the rest at http://evilbrainjono.net."
         else:
-            message = "\n\n<a href=\"http://www.evilbrainjono.net/blog/new?type=comment&original=%d#form\">Leave a comment</a>" % newEntry.id
-        update_rss( title, words + message, link, RSS_FILE )
+            message = "\n\n<a href=\"http://www.evilbrainjono.net/blog/new?type=comment&original=%d#form\">Leave a comment</a>" % entry.id
+        update_rss( entry.title, entry.words + message, link, RSS_FILE )
     if tweet == "yes":
         message = "New blog post: %s %s" % (entry.title, link)
         if len(message) <= 140:
@@ -119,6 +124,7 @@ def printBlogEntryForm():
     else:
         username = None
 
+    # Only admin can make posts!
     if username != ADMIN_USERNAME:
         print_redirect("/blog")
 
@@ -131,7 +137,6 @@ def printBlogEntryForm():
         else:
             add_submission(q, username, type)
         print_redirect("/blog")
-
 
     newText = ""
     contentHtml = ""

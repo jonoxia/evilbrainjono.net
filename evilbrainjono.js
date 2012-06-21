@@ -1,5 +1,27 @@
+var tagList = [];
+
+// tag autocomplete function for when tagging posts
+function suggestTags(e) {
+    if (tagList.length == 0) {
+	tagList = $("#hidden-tag-list").html().split(",");
+    }
+    var input = $("#tag-input").val();
+    var inputTags = input.split(",");
+    var lastTag = inputTags[ inputTags.length - 1 ].replace(" ", "");
+
+    $("#tag-suggestions").empty();
+    for (var x = 0; x < tagList.length; x ++) {
+	if (tagList[x].indexOf(lastTag) > -1) {
+	    $("#tag-suggestions").append(" " + tagList[x]);
+	}
+    }
+}
+
 
 $(document).ready(function() {
+	// suggest tags when i type in the tag box
+	$("#tag-input").keyup(suggestTags);
+
 	// Add handlers for "read more" links on long posts
 	var unfoldLinks = $(".unfold-link");
 	var unfoldDivs = $(".unfold-div");
