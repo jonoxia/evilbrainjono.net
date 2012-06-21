@@ -245,7 +245,7 @@ def make_tags_for_entry(newEntry, tags):
         tagName = tagName.strip(" ")
         blogTag = model.BlogTag.selectBy( name = tagName )
         if blogTag.count() == 0:
-            blogTag = BlogTag( name = tagName )
+            blogTag = model.BlogTag( name = tagName )
         else:
             blogTag = blogTag[0]
         model.EntryToTagLink(entry = newEntry.id, tag = blogTag.id)
