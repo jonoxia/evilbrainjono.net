@@ -94,8 +94,8 @@ q = cgi.FieldStorage()
 error_message = ''
 
 if q.has_key('submission'):
-    if q['submission'].value == 'Create':
-        error_message = check_create_ok(q)
+    #if q['submission'].value == 'Create':
+    #    error_message = check_create_ok(q)
     if q['submission'].value == 'Login':
         error_message = check_login_ok(q)
 
