@@ -1,22 +1,21 @@
-body {background-color: #3366DD; margin: 3%;}
+body {background-color: #3366DD; margin: 1%}
 div {background-color: #F0F0F0; border-style: solid;}
 
-div.title {width: 100%; margin: 0em; text-align: left; border-style: none; background-color:#3366DD}
-div.left-title {float: left; width: 75%; padding: 0em; margin-bottom: 2em;}
-div.left-title ul {text-align: left; list-style-type: none;}
-div.title img {float: right; margin-left: 1.5em;}
-div.title a img {border: none;}
-div.navigation {float: right; width: 20%; height: 281px; margin-botton: 2em;
-text-align: center;}
+div.title {width: 100%; margin: 0em; text-align: center; border-style: none;}
+div.title img {margin: 0.5em;}
+div.left-title {float: left; width: 73%; padding: 0em; margin-bottom: 2em; text-align: center; min-height: 300px;}
+div.navigation {float: right; width: 23%; margin-bottom: 2em; text-align: center; min-height: 300px;}
+div.navigation ul {text-align: left; list-style-type: none;}
 
-div.contents {float:left; width: 75%; padding-left: 0em; padding-right: 0em;}
+div.contents {float:left; width: 73%; padding-left: 0em; padding-right: 0em;}
 div.contents p {clear: both;}
 div.contents h2 {text-align: center}
 div.contents img {margin: 1em; float: left;}
 
-div.sidebar {float:right; width: 20%; text-align: left;}
-div.sidebar ul {text-align: left; font-size: small; margin: 1em}
+div.sidebar {float:right; width: 23%; text-align: left;}
+div.sidebar ul {text-align: left; font-size: small; margin: 1em;}
 div.sidebar h4  {text-align: center}
+div.sidebar a img {text-align: center}
 
 div.entry {border-style: none; margin: 1.5em}
 div.entry div {border-style: none;}
