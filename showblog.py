@@ -10,7 +10,7 @@ import datetime
 from sqlobject import AND
 from blog_config import ADMIN_USERNAME
 
-POSTS_PER_PAGE = 12
+POSTS_PER_PAGE = 20
 
 def make_month_links(showcomments):
     beginning_of_time = datetime.datetime( 2004, 7, 1 )
