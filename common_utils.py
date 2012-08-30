@@ -49,7 +49,6 @@ def print_redirect(url, cookie=None):
     print "Status: 302" # temporary redirect
     if cookie:
         print cookie
-    # TODO this redirect loses showcomments setting
     print "Location: " + url
     print
     sys.exit(1)
@@ -81,7 +80,7 @@ def render_comment_entry_form( id, form ):
                                            {"defaultUsername": defaultUsername})
 
     # Figure out returnUrl from form stuff
-    returnArgs = {"showcomments": "true"}
+    returnArgs = {}
     for key in ["tag", "month", "year", "permalink"]:
         if form.has_key(key):
             returnArgs[key] = form[key].value
@@ -95,7 +94,7 @@ def render_comment_entry_form( id, form ):
                                                           "defaultText": defaultText,
                                                           "loginFields": loginFields} )
 
-def show_comments_for_entry(id, form):
+def show_comments_for_entry(id, defaultShown, form):
     posts = model.BlogEntry.selectBy(id = id)
     post = posts[0]
     if post.comments_disabled:
@@ -130,9 +129,13 @@ def show_comments_for_entry(id, form):
 
     entryFormHtml = render_comment_entry_form(id, form)
 
+    additionalClass = ""
+    if not defaultShown:
+        additionalClass = "hidden-comment"
     return render_template_file("comment_area.html", {"id":id,
                                                       "comments": commentHtml,
-                                                      "new_comment_entry": entryFormHtml
+                                                      "new_comment_entry": entryFormHtml,
+                                                      "class": additionalClass
                                                       })
 
 

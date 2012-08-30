@@ -83,7 +83,6 @@ def set_cookie(q):
     C["password"]["path"] = "/"
     print "Status: 302" # temporary redirect
     print C
-    # TODO this redirect loses showcomments setting
     print "Location: " + "/blog"
     print
     sys.exit(1)

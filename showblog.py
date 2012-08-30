@@ -12,7 +12,7 @@ from blog_config import ADMIN_USERNAME
 
 POSTS_PER_PAGE = 20
 
-def make_month_links(showcomments):
+def make_month_links():
     beginning_of_time = datetime.datetime( 2004, 7, 1 )
     endDate = datetime.datetime.now()
     startDate = datetime.datetime( endDate.year, endDate.month, 1 )
@@ -21,7 +21,7 @@ def make_month_links(showcomments):
     while (endDate > beginning_of_time):
         numEntries = BlogEntry.select( AND( BlogEntry.q.date >= startDate, BlogEntry.q.date < endDate ) ).count()
         if (numEntries > 0):
-            linkDestination = "/blog?showcomments=%s&year=%d&month=%d" % (showcomments, startDate.year, startDate.month)
+            linkDestination = "/blog?year=%d&month=%d" % (startDate.year, startDate.month)
             archive_links += "<li><a href=\"%s\">%s (%d)</a></li>" % ( linkDestination, 
                                                                        startDate.strftime("%B %Y"), 
                                                                        numEntries )
@@ -36,12 +36,12 @@ def make_month_links(showcomments):
     return archive_links
 
 
-def make_tag_links(showcomments):
+def make_tag_links():
     tags = BlogTag.select(orderBy="name")
     tag_links = ""
-    tag_links += "<h4>Tags:</h4> <ul><li><a href=\"/blog?showcomments=%s\">Latest</a></li>" % showcomments
+    tag_links += "<h4>Tags:</h4> <ul><li><a href=\"/blog\">Latest</a></li>"
     for tag in tags:
-        tag_links += "<li><a href=\"/blog?tag=%s&showcomments=%s\">" % (tag.name, showcomments)
+        tag_links += "<li><a href=\"/blog?tag=%s\">" % tag.name
         number = EntryToTagLink.selectBy(tag = tag.id).count()
         # When showing tag name as link, replace underscores with spaces.
         tag_name = tag.name.replace("_", " ")
@@ -62,12 +62,8 @@ def make_entry_action_links(username, entry):
 
     return linkHtml
 
-def make_action_links(username, showcomments, q):
+def make_action_links(username, q):
     action_links = ""
-    if  showcomments == 'false':
-        action_links += "<li><a href=\"%s\">Show Comments</a></li>" % show_comments_url(q, True)
-    else:
-        action_links += "<li><a href=\"%s\">Hide Comments</a></li>" % show_comments_url(q, False)
     if not username:
         action_links += "<li><a href=\"/blog/login\">Login</a></li>"
     else:
@@ -81,18 +77,7 @@ def make_action_links(username, showcomments, q):
 
     return action_links
 
-def show_comments_url(q, showComments = True):
-    # Preserve all other arguments to the query (to preseve the location) but turn on comments:
-    if showComments:
-        url = "/blog?showcomments=true"
-    else:
-        url = "/blog?showcomments=false"
-    for argName in ["tag", "month", "year", "permalink"]:
-        if q.has_key(argName):
-            url += "&%s=%s" % (argName, q[argName].value)
-    return url
-
-def make_entry_tags_links(entry, showcomments):
+def make_entry_tags_links(entry):
     tagPicsHtml = ""
     rows = EntryToTagLink.selectBy(entry = entry.id)
     tags = []
@@ -105,7 +90,7 @@ def make_entry_tags_links(entry, showcomments):
     if len(tags) > 0:
         tagPicsHtml += "Tagged: "
     for tag in tags:
-        linkText = "<a href=\"/blog?tag=%s&showcomments=%s\">" % (tag.name, showcomments)
+        linkText = "<a href=\"/blog?tag=%s\">" % tag.name
         if tag.name in ["rpg", "politics", "music"]:    # add supported categories here
             imgSrc = "/images/tags/%s.jpg" % tag.name
             imgText = linkText + "<img src=\"%s\"></a>" % imgSrc
@@ -118,17 +103,12 @@ def make_entry_tags_links(entry, showcomments):
 def renderMainBlogPage():
     q = cgi.FieldStorage()
 
-    showcomments = 'false'
     tagName = None
     month = 0
     year = 0
     permalink = 0
     username = None
     pageContentLinks = ""
-
-    # TODO: maybe put showcomments in a cookie so we don't have to pass it around in the url all the time?
-    if q.has_key("showcomments"):
-        showcomments = q["showcomments"].value
 
     if q.has_key("tag"):
         tagName = q["tag"].value
@@ -188,16 +168,22 @@ def renderMainBlogPage():
    
     content = ""
     for entry in entries:
-        if (showcomments == "true"):
-            commentsHtml = show_comments_for_entry(entry.id, q)
-            featureHtml = ""
+        # Prepare comment area. It should default shown if we got here by permalink or
+        # URL fragment anchor, otherwise default hidden.
+        if permalink != 0:
+            # TODO or if URL fragment contains "c" meaning anchor to comment meaning
+            # someone wanted to link us directly here.
+            defaultCommentsShown = True
         else:
-            commentsHtml = ""
-            numComments = BlogComment.selectBy(original_post = entry.id).count()
-            commentLinkUrl = show_comments_url(q) + "#%dc" % entry.id
-            featureHtml = "<a href=\"%s\">%d comments</a> | " % (commentLinkUrl, numComments)
+            defaultCommentsShown = False
+        commentsHtml = show_comments_for_entry(entry.id, defaultCommentsShown, q)
+        numComments = BlogComment.selectBy(original_post = entry.id).count()
+        if defaultCommentsShown:
+            featureHtml = "<a class=\"comment-link\">Hide Comments</a> | "
+        else:
+            featureHtml = "<a class=\"comment-link\">%d comments</a> | " % numComments
 
-        tagPicsHtml = make_entry_tags_links(entry, showcomments)
+        tagPicsHtml = make_entry_tags_links(entry)
         featureHtml += make_entry_action_links(username, entry)
 
         # Is this a long entry, i.e. there's below-the-fold-content?
@@ -227,9 +213,9 @@ def renderMainBlogPage():
 
     substitution_dict["contents"] = content
     substitution_dict["navigation"] = ""
-    substitution_dict["actionlinks"] = make_action_links(username, showcomments, q)
-    substitution_dict["categorylinks"] = pageContentLinks + make_tag_links(showcomments)
-    substitution_dict["archivelinks"] = make_month_links(showcomments)
+    substitution_dict["actionlinks"] = make_action_links(username, q)
+    substitution_dict["categorylinks"] = pageContentLinks + make_tag_links()
+    substitution_dict["archivelinks"] = make_month_links()
     substitution_dict["twitterlinks"] = links_from_rss_feed(TWITTER_FEED)
     substitution_dict["jonoscriptlinks"] = links_from_rss_feed(JONOSCRIPT_FEED)
     print render_template_file( "blog.html", substitution_dict )

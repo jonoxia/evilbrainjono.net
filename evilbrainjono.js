@@ -17,14 +17,9 @@ function suggestTags(e) {
     }
 }
 
-
-$(document).ready(function() {
-	// suggest tags when i type in the tag box
-	$("#tag-input").keyup(suggestTags);
-
-	// Add handlers for "read more" links on long posts
-	var unfoldLinks = $(".unfold-link");
-	var unfoldDivs = $(".unfold-div");
+function enableShowHideLinks(linkClass, divClass, hideText, showText) {
+	var unfoldLinks = $(linkClass);
+	var unfoldDivs = $(divClass);
 
 	var unfoldStatus = [];
 
@@ -32,18 +27,33 @@ $(document).ready(function() {
             link.click(function(e) {
                 if (unfoldStatus[index] == "hidden") {
                         div.slideDown();
-                        link.html("Read Less");
+                        link.html(hideText);
                         unfoldStatus[index] = "shown";
                     } else {
                         div.slideUp();
-                        link.html("Read More");
+                        link.html(showText);
                         unfoldStatus[index] = "hidden";
 		    }
 		});
 	};
 
 	for (var i = 0; i < unfoldLinks.length; i++) {
-	    unfoldStatus.push("hidden");
+	    // Initialize unfoldStatus array to correctly track
+	    // whether the div started out shown or hidden:
+	    if ($(unfoldDivs[i]).css("display") == "none") {
+		unfoldStatus.push("hidden");
+	    } else {
+		unfoldStatus.push("shown");
+	    }
 	    makeLinkHandler($(unfoldLinks[i]), $(unfoldDivs[i]), i);
 	}
+}
+
+$(document).ready(function() {
+	// suggest tags when i type in the tag box
+	$("#tag-input").keyup(suggestTags);
+	// Add handlers for "read more" links on long posts
+	enableShowHideLinks(".unfold-link", ".unfold-div", "Read Less", "Read More");
+	// Add handlers for "show/hide comments" links:
+	enableShowHideLinks(".comment-link", ".comments", "Hide Comments", "Show Comments");
 });
