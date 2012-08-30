@@ -102,6 +102,7 @@ def renderMainBlogPage():
     month = 0
     year = 0
     permalink = 0
+    showcomments = False
     username = None
     pageContentLinks = ""
 
@@ -116,6 +117,9 @@ def renderMainBlogPage():
 
     if q.has_key("permalink"):
         permalink = q["permalink"].value
+
+    if q.has_key("showcomments"):
+        showcomments = q["showcomments"].value
 
     cookie = getCookie()
     if cookie.has_key("blogin"):
@@ -165,9 +169,7 @@ def renderMainBlogPage():
     for entry in entries:
         # Prepare comment area. It should default shown if we got here by permalink or
         # URL fragment anchor, otherwise default hidden.
-        if permalink != 0:
-            # TODO or if URL fragment contains "c" meaning anchor to comment meaning
-            # someone wanted to link us directly here.
+        if permalink != 0 or showcomments == "true":
             defaultCommentsShown = True
         else:
             defaultCommentsShown = False

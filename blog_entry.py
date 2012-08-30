@@ -67,7 +67,7 @@ def publicize(q, entry):
         if len(entry.more_words) > 0:
             message = "\n\n This post was really long, so I snipped it.  Read the rest at http://evilbrainjono.net."
         else:
-            message = "\n\n<a href=\"http://www.evilbrainjono.net/blog/new?type=comment&original=%d#form\">Leave a comment</a>" % entry.id
+            message = "\n\n<a href=\"http://www.evilbrainjono.net/blog?showcomments=true#%dc\">Leave a comment</a>" % entry.id
         update_rss( entry.title, entry.words + message, link, RSS_FILE )
     if tweet == "yes":
         message = "New blog post: %s %s" % (entry.title, link)
