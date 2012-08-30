@@ -43,7 +43,9 @@ def make_tag_links(showcomments):
     for tag in tags:
         tag_links += "<li><a href=\"/blog?tag=%s&showcomments=%s\">" % (tag.name, showcomments)
         number = EntryToTagLink.selectBy(tag = tag.id).count()
-        linktext = tag.name + " (%d)" % number
+        # When showing tag name as link, replace underscores with spaces.
+        tag_name = tag.name.replace("_", " ")
+        linktext = tag_name + " (%d)" % number
         tag_links += linktext 
         tag_links += "</a></li>"
     tag_links += "</ul>"
