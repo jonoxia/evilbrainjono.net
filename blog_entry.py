@@ -54,7 +54,7 @@ def print_original_entry(id):
                                                           "words": entry.words,
                                                           "commentarea": commentsHtml,
                                                           "features": "",
-                                                          "tagpics": ""})
+                                                          "tags": ""})
     return entryHtml
 
 

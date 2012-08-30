@@ -78,7 +78,7 @@ def make_action_links(username, q):
     return action_links
 
 def make_entry_tags_links(entry):
-    tagPicsHtml = ""
+    tagsHtml = ""
     rows = EntryToTagLink.selectBy(entry = entry.id)
     tags = []
     # TODO this would be easier if I used sqlobject relatedJoin.
@@ -88,16 +88,11 @@ def make_entry_tags_links(entry):
             tags.append( blogTags[0] )
             
     if len(tags) > 0:
-        tagPicsHtml += "Tagged: "
+        tagsHtml += "Tagged: "
     for tag in tags:
         linkText = "<a href=\"/blog?tag=%s\">" % tag.name
-        if tag.name in ["rpg", "politics", "music"]:    # add supported categories here
-            imgSrc = "/images/tags/%s.jpg" % tag.name
-            imgText = linkText + "<img src=\"%s\"></a>" % imgSrc
-            tagPicsHtml += imgText
-        else:
-            tagPicsHtml += linkText + tag.name + "</a> "
-    return tagPicsHtml
+        tagsHtml += linkText + tag.name + "</a> "
+    return tagsHtml
 
 
 def renderMainBlogPage():
@@ -183,7 +178,7 @@ def renderMainBlogPage():
         else:
             featureHtml = "<a class=\"comment-link\">%d comments</a> | " % numComments
 
-        tagPicsHtml = make_entry_tags_links(entry)
+        tagsHtml = make_entry_tags_links(entry)
         featureHtml += make_entry_action_links(username, entry)
 
         # Is this a long entry, i.e. there's below-the-fold-content?
@@ -203,7 +198,7 @@ def renderMainBlogPage():
                                                                "morewords": belowTheFold,
                                                                "commentarea": commentsHtml,
                                                                "features": featureHtml,
-                                                               "tagpics": tagPicsHtml})
+                                                               "tags": tagsHtml})
         if (pageContentLinks != ""):
             pageContentLinks += "<li><a href=\"#%d\">%s</a></li>" % (entry.id, entry.title)
         content += entryHtml
