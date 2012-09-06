@@ -1,3 +1,6 @@
+/* TODO too many global variables --
+ * refactor this file to make it more object-oriented */
+
 var g_files;
 var g_fileIndex;
 var g_file_metadata = [];
@@ -15,7 +18,7 @@ function handleFiles(files) {
 		    id: i,
 		    offsetX: 0,
 		    offsetY: 0
-                           });
+		    });
     }
     previewFile();
 }
@@ -45,6 +48,10 @@ function drawFile(canvas) {
         ctx.scale(metadata.scale, metadata.scale);
         ctx.drawImage(metadata.img, 0, 0);
 	ctx.restore();
+	ctx.strokeStyle = "black";
+	ctx.strokeRect(metadata.crop.left, metadata.crop.top,
+		       metadata.crop.right - metadata.crop.left,
+		       metadata.crop.bottom - metadata.crop.top);
     }
 
     if (metadata.img) {
@@ -60,8 +67,11 @@ function drawFile(canvas) {
 		metadata.width = parseInt(img.width);
 		metadata.height = parseInt(img.height);
 		metadata.img = img;
-		
 		metadata.scale = (600.0 / img.width);
+		metadata.crop = {left: 0, top: 0,
+				 right: Math.floor(img.width * metadata.scale),
+				 bottom: Math.floor(img.height * metadata.scale)};
+
 
 		drawIt(metadata);
 	    };
@@ -171,32 +181,25 @@ function uploadImage() {
     metadata.altText = document.getElementById("alt-text").value;
     metadata.caption = document.getElementById("caption").value;
 
-    // Client side TODOs: 
-    // TODO set bounding box before doing toDataURL so we don't pick up whitespace
-    // on the edges.
-    // TODO allow user to set bounding box manually, as well as setting offset manually
     // TODO show status of all ongoing uploads while allowing user to move on to next
     // picture and start writing a caption there.
-    // TODO why is it taking so long?
-    // TODO it's picking up incorrect width and height properties for some reason.
-    var bbox = {};
-    if (metadata.rotation == 1 || metadata.rotation == 3) {
-	bbox.width = Math.floor( metadata.height * metadata.scale + 0.5);
-	bbox.height = Math.floor( metadata.width * metadata.scale + 0.5);
-    } else {
-	bbox.width = Math.floor( metadata.width * metadata.scale + 0.5);
-	bbox.height = Math.floor( metadata.height * metadata.scale + 0.5);
-    }
-    console.log("width = " + bbox.width + ", height = " + bbox.height);
+    bbox = {left: metadata.crop.left,
+	    top: metadata.crop.top,
+	    width: metadata.crop.right - metadata.crop.left,
+	    height: metadata.crop.bottom - metadata.crop.top};
     
     var exportCanvas = $("<canvas></canvas>");
     exportCanvas.attr("width", bbox.width);
     exportCanvas.attr("height", bbox.height);
+    $("#export-area").empty();
     $("#export-area").append(exportCanvas);
+    var ctx = exportCanvas[0].getContext("2d");
+    ctx.translate(0 - bbox.left, 0 - bbox.top);
     drawFile(exportCanvas);
     var dataUrl = exportCanvas[0].toDataURL("image/jpg");
-    $("#export-area").empty();
 
+    $("#export-area").empty();
+    
     var postArgs = {
         filename: metadata.id,
         directory: picSet,
@@ -215,8 +218,7 @@ function uploadImage() {
 		type: "POST",
 		success: function(data, textStatus) {
                   output(data);
-		  metadata.uploaded = true; // TODO use this to display
-		                              //loaded msg
+		  metadata.uploaded = true;
 		  progressMeter.remove();
 	        },
 		error: function(req, textStatus, error) {
@@ -261,7 +263,7 @@ function handleKeypress(e) {
         case 83: 
 	    uploadImage();
 	    break;
-        // ctrol -X
+        // ctrl -X
 	case 88:
 	    deleteImage();
 	    break;
@@ -271,8 +273,18 @@ function handleKeypress(e) {
 
 var mouseDownLoc = {x: 0, y: 0};
 var mouseIsDown = false;
+var boxStartPt = null;
+var boxEndPt = null;
+var offset = null;
 
+/* Mouse interface: Drag to set clipping rectangle.
+   Shift-drag to translate the image. */
 function canvasMouseDown(e) {
+    if (!e.shiftKey) {
+	boxStartPt = {x: e.pageX - offset.left,
+		      y: e.pageY - offset.top};
+    }
+    console.log("Is shift key down? " + e.shiftKey);
     mouseDownLoc.x = e.pageX;
     mouseDownLoc.y = e.pageY;
     mouseIsDown = true;
@@ -280,14 +292,26 @@ function canvasMouseDown(e) {
 
 function canvasMouseMove(e) {
     if (mouseIsDown) {
-    var dx = e.pageX - mouseDownLoc.x;
-    var dy = e.pageY - mouseDownLoc.y;
-    var metadata = g_file_metadata[g_fileIndex];
-    metadata.offsetX += dx;
-    metadata.offsetY += dy;
-    previewFile();
-    mouseDownLoc.x = e.pageX;
-    mouseDownLoc.y = e.pageY;
+	var dx = e.pageX - mouseDownLoc.x;
+	var dy = e.pageY - mouseDownLoc.y;
+	var metadata = g_file_metadata[g_fileIndex];
+
+	if (e.shiftKey) {
+	    // shift key drags image
+	    metadata.offsetX += dx;
+	    metadata.offsetY += dy;
+	} else {
+	    // without shift key, drag crop box:
+	    boxEndPt = {x: e.pageX - offset.left,
+			y: e.pageY - offset.top};
+	    metadata.crop.left = Math.min(boxStartPt.x, boxEndPt.x);
+	    metadata.crop.top = Math.min(boxStartPt.y, boxEndPt.y);
+	    metadata.crop.right = Math.max(boxStartPt.x, boxEndPt.x);
+	    metadata.crop.bottom = Math.max(boxStartPt.y, boxEndPt.y);
+	}
+	previewFile();
+	mouseDownLoc.x = e.pageX;
+	mouseDownLoc.y = e.pageY;
     }
 }
 
@@ -300,5 +324,6 @@ $(document).ready(function() {
 	$("#preview-canvas").bind("mousedown", canvasMouseDown);
 	$("#preview-canvas").bind("mouseup", canvasMouseUp);
 	$("#preview-canvas").bind("mousemove", canvasMouseMove);
+	offset = $("#preview-canvas").offset();
     });
 
