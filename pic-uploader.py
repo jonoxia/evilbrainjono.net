@@ -7,8 +7,14 @@ import base64
 import cgi
 import cgitb
 import time
+import Image #Python Image Library
 from model import *
 from common_utils import *
+
+def compress(infilename, outfilename):
+  # See http://www.pythonware.com/library/pil/handbook/introduction.htm
+  im = Image.open(infilename)
+  im.save(outfilename, "JPEG", quality = 90)
 
 def writeFile(path, data):
   file = open( path, "wb")
@@ -34,11 +40,14 @@ altText = q.getfirst("altText", "")
 dirPath = os.path.join(BASE_PATH, directory)
 if not os.path.exists(dirPath):
   os.mkdir(dirPath)
+
+# Save image to a temporary file, then compress it
 filename = "%s.jpg" % filename
 filePath = os.path.join(dirPath, filename)
+tempFilePath = os.path.join(dirPath, "tmp.jpg")
 url = "/images/%s/%s" % (directory, filename)
-
-writeFile(filePath, data)
+writeFile(tempFilePath, data)
+compress(tempFilePath, filePath)
 
 html = render_template_file("pic.html", {"url": url,
                                    "alt": altText,
