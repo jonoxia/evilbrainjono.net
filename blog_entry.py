@@ -10,15 +10,38 @@ from blog_config import ADMIN_USERNAME
 
 cgitb.enable()
 
+def get_tags_for_entry(entry):
+    # TODO this duplicates logic in make_entry_tag_links
+    # in showblog.py.
+    rows = EntryToTagLink.selectBy(entry = entry.id)
+    tags = []
+    # TODO this would be easier if I used sqlobject relatedJoin.
+    for row in rows:
+        blogTags = BlogTag.selectBy(id = row.tag)
+        if blogTags.count() > 0:
+            tags.append( blogTags[0].name )
+    return tags
+
+def delete_tags_for_entry(entry):
+    links = EntryToTagLink.selectBy(entry = entry.id)
+    for link in links:
+        EntryToTagLink.delete(link.id)
+        
+
 def make_form(type, editid, username, newText):
+    # TODO there's some entanglement of the post form with the
+    # comment form here -- it was an attempt to share code but
+    # I don't like it.
     default_text = newText
     default_title = ""
     moreWords = ""
+    default_tags = ""
     publicChecked = "checked"
     if type == "editentry":
         oldEntry = get_old_entry(editid)
         default_text = oldEntry.words
         default_title = oldEntry.title
+        default_tags = ", ".join(get_tags_for_entry(oldEntry))
         if not oldEntry.public:
             publicChecked = ""
         if oldEntry.more_words != None:
@@ -37,7 +60,8 @@ def make_form(type, editid, username, newText):
         # add the 'more words' area and the publishing checkboxes:
         extrasHtml += render_template_file( "more_message.html", {"more_words": moreWords,
                                                                   "tag_list": tagList,
-                                                                  "public_checked": publicChecked} )
+                                                                  "public_checked": publicChecked,
+                                                                  "current_tags": default_tags} )
         dict["extras"] = extrasHtml
     return render_template_file ( "entry_form.html", dict )
 
@@ -102,15 +126,24 @@ def add_submission(q, username, type):
         pass
 
 def commit_edit(q, username, editid):
-    # TODO allow this to set/clear tags, too
+    # For editing existing posts. Admin user only.
     if username == ADMIN_USERNAME:
         theEntry = get_old_entry(editid)
         theEntry.words = html_clean(q.getfirst("message", ""))
         theEntry.title = q.getfirst("title", "")
         theEntry.more_words = html_clean(q.getfirst("more_message", ""))
-        public = q.getfirst("public", "")
 
-        # If we take a private post and turn it public, announce it! (if i don't want this, uncheck the rss/twitter boxes)
+        # Modifying tags:
+        # Delete all existing tags, create new ones. (Not the
+        # most efficient method, but guaranteed to work)
+        new_tags = q.getfirst("tags", "")
+        delete_tags_for_entry(theEntry)
+        make_tags_for_entry(theEntry, new_tags)
+
+        # If we take a private post and turn it public, announce 
+        # it via RSS/twitter.
+        # (if i don't want this, uncheck the rss/twitter boxes)
+        public = q.getfirst("public", "")
         if (theEntry.public == False) and (public == "yes"):
             publicize(q, theEntry)
         theEntry.public = (public == "yes")
@@ -141,9 +174,10 @@ def printBlogEntryForm():
     newText = ""
     contentHtml = ""
     if type == "editentry":
-        contentHtml +=  "Jono is editing old entry id " + editid + " : "
+        contentHtml +=  "%s is editing old entry id %s:" % (
+            ADMIN_USERNAME, editid)
     else:
-        contentHtml += "Jono is making a new entry: "
+        contentHtml += "%s is making a new entry: " % ADMIN_USERNAME
 
     contentHtml += make_form(type, editid, username, newText)
     

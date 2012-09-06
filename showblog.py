@@ -71,9 +71,9 @@ def make_action_links(username, q):
         action_links += "<li><a href=\"/blog/login\">Logout</a></li>"
 
     if username == ADMIN_USERNAME:
-        action_links +=  "<li>Welcome back, Jono.  I have guarded your blog vigilantly while you were away.  Want to <a href=\"blog/new?type=entry\">make a new entry</a>?</li>"
+        action_links +=  "<li>Welcome back, Jono. <a href=\"blog/new?type=entry\">New entry</a> | <a href=\"/pic-uploader.html\">Pic Upload</a> | <a href=\"\">Drafts</a></li>"
     elif username:
-        action_links += "<li>Hi %s!  How you doin?  Glad you could make it.  Jono would be right happy if you left him some comments.</li>" % username
+        action_links += "<li>Hi %s!</li>" % username
 
     return action_links
 
