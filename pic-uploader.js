@@ -1,9 +1,8 @@
+var g_files;
+var g_fileIndex;
+var g_file_metadata = [];
 
-  var g_files;
-  var g_fileIndex;
-  var g_file_metadata = [];
-
-  function handleFiles(files) {
+function handleFiles(files) {
     g_files = files;
     g_fileIndex = 0;
     for (var i = 0; i < files.length; i++) {
@@ -19,18 +18,18 @@
                            });
     }
     previewFile();
-  }
+}
 
-  function output(text) {
+function output(text) {
     document.getElementById("output").innerHTML = text;
-  }
+}
 
-  function drawFile(canvas) {
+function drawFile(canvas) {
     var nextFile = g_files[g_fileIndex];
     var imageType = /image.*/;
     if (!nextFile.type.match(imageType)) {  
-      output("Not an image");
-      return;
+	output("Not an image");
+	return;
     }
 
     var metadata = g_file_metadata[g_fileIndex];
@@ -49,28 +48,28 @@
     }
 
     if (metadata.img) {
-      drawIt(metadata);
-      output("Image preview: ");
-      output("Pic number: " + metadata.id);
+	drawIt(metadata);
+	output("Image preview: ");
+	output("Pic number: " + metadata.id);
     } else {
-      output("Loading image file...");
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var img = new Image();
-        img.onload = function() {
-	  metadata.width = parseInt(img.width);
-	  metadata.height = parseInt(img.height);
-	  metadata.img = img;
-	  
-	  metadata.scale = (600.0 / img.width);
+	output("Loading image file...");
+	var reader = new FileReader();
+	reader.onload = function(e) {
+	    var img = new Image();
+	    img.onload = function() {
+		metadata.width = parseInt(img.width);
+		metadata.height = parseInt(img.height);
+		metadata.img = img;
+		
+		metadata.scale = (600.0 / img.width);
 
-	  drawIt(metadata);
+		drawIt(metadata);
+	    };
+	    img.src = e.target.result;
 	};
-	img.src = e.target.result;
-      };
-      reader.readAsDataURL(nextFile);
+	reader.readAsDataURL(nextFile);
     }
-  }
+}
 
 function previewFile() {
     drawFile($("#preview-canvas"));
@@ -92,7 +91,7 @@ function deleteImage() {
     nextFile();
 }
 
-  function nextFile() {
+function nextFile() {
     var newIndex = g_fileIndex + 1;
     // skip deleted/uploaded pics:
     while (newIndex < g_files.length &&
@@ -102,14 +101,14 @@ function deleteImage() {
     }
     // Don't go past the end:
     if (newIndex >= g_files.length) {
-      output("No more files to preview");
-      return;
+	output("No more files to preview");
+	return;
     }
     g_fileIndex = newIndex;
     previewFile();
-  }
+}
 
-  function previousFile() {
+function previousFile() {
     var newIndex = g_fileIndex - 1;
     // skip deleted/uploaded pics:
     while (newIndex >= 0 &&
@@ -119,28 +118,28 @@ function deleteImage() {
     }
     // Don't go past the en
     if (newIndex < 0) {
-      output("No previous files to preview");
-      return;
+	output("No previous files to preview");
+	return;
     }
     g_fileIndex = newIndex;
     previewFile();
-  }
+}
 
-  function saveText() {
+function saveText() {
     var metadata = g_file_metadata[g_fileIndex];
     metadata.altText = document.getElementById("alt-text").value;
     metadata.caption = document.getElementById("caption").value;
-  }
+}
 
-  function restoreText() {
+function restoreText() {
     var metadata = g_file_metadata[g_fileIndex];
     var altText = document.getElementById("alt-text");
     altText.value = metadata.altText;
     document.getElementById("caption").value = metadata.caption;
     altText.focus();
-  }
+}
 
-  function rotatePreview() {
+function rotatePreview() {
     var metadata = g_file_metadata[g_fileIndex];
     metadata.rotation += 1;
     if (metadata.rotation == 4) metadata.rotation = 0;
@@ -150,21 +149,21 @@ function deleteImage() {
 	metadata.scale = (600.0 / metadata.width);
     }
     previewFile();
-  }
+}
 
-  function zoomInPreview() {
+function zoomInPreview() {
     var metadata = g_file_metadata[g_fileIndex];
     metadata.scale += 0.1;
     previewFile();
-  }
+}
 
-  function zoomOutPreview() {
+function zoomOutPreview() {
     var metadata = g_file_metadata[g_fileIndex];
     metadata.scale -= 0.1;
     previewFile();
-  }
+}
 
-  function uploadImage() {
+function uploadImage() {
     output("Converting image...");
     var metadata = g_file_metadata[g_fileIndex];
     var picSet = document.getElementById("pic-set-name").value;
@@ -210,7 +209,7 @@ function deleteImage() {
     output("Uploading image and caption... " + postArgs.caption);
     var progressMeter = $("<li>Uploading image " + metadata.id + " ...</li>");
     $("#in-progress").append(progressMeter);
-
+    
     jQuery.ajax({url:"pic-uploader.py",
 		data: postArgs,
 		type: "POST",
@@ -226,49 +225,49 @@ function deleteImage() {
 	        },
 		dataType: "html"});    
     // TODO show progress bar.
-  }
+}
 
-  function handleKeypress(e) {
-      if (e.ctrlKey) {
-        e.preventDefault();
+function handleKeypress(e) {
+    if (e.ctrlKey) {
+	e.preventDefault();
         output("key pressed - " + e.which);
-
+	
 	switch(e.which) {
         // ctrl - N
 	case 78:
-          saveText();
-          nextFile();
-          restoreText();
-	  break;
+	    saveText();
+	    nextFile();
+	    restoreText();
+	    break;
         // ctrl - P
 	case 80:
-          saveText();
-          previousFile();
-	  restoreText();
-	  break;
+	    saveText();
+	    previousFile();
+	    restoreText();
+	    break;
 	// ctrl - R
 	case 82:
-          rotatePreview();
-	  break;
+	    rotatePreview();
+	    break;
 	  // ctrl - +
 	case 107: case 61:
-          zoomInPreview();
-          break;
+	    zoomInPreview();
+	    break;
          // ctrl - -
 	case 109:
-          zoomOutPreview();
-          break;
+	    zoomOutPreview();
+	    break;
         // ctrl - S
         case 83: 
-	  uploadImage();
-	  break;
+	    uploadImage();
+	    break;
         // ctrol -X
 	case 88:
-	  deleteImage();
-	  break;
+	    deleteImage();
+	    break;
         }
-      }
-  }
+    }
+}
 
 var mouseDownLoc = {x: 0, y: 0};
 var mouseIsDown = false;
