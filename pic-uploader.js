@@ -76,21 +76,53 @@ function previewFile() {
     drawFile($("#preview-canvas"));
 }
 
+function deleteImage() {
+    // Don't actually remove the image from g_files;
+    // other code depends on the indexes to be stable.
+    // Instead, mark its metadata as deleted and then
+    // skip those when going through.
+    g_file_metadata[g_fileIndex].deleted = true;
+
+    // get rid of references to the picture data so the 
+    // garbage collector can clean it up:
+    g_files[g_fileIndex] = null;
+    g_file_metadata[g_fileIndex].img = null;
+
+    // move us to the next non-deleted image:
+    nextFile();
+}
+
   function nextFile() {
-    if (g_fileIndex >= g_files.length - 1) {
+    var newIndex = g_fileIndex + 1;
+    // skip deleted/uploaded pics:
+    while (newIndex < g_files.length &&
+	   (g_file_metadata[newIndex].deleted ||
+	    g_file_metadata[newIndex].uploaded)) {
+	newIndex ++;
+    }
+    // Don't go past the end:
+    if (newIndex >= g_files.length) {
       output("No more files to preview");
       return;
     }
-    g_fileIndex ++;
+    g_fileIndex = newIndex;
     previewFile();
   }
 
   function previousFile() {
-    if (g_fileIndex <= 0) {
+    var newIndex = g_fileIndex - 1;
+    // skip deleted/uploaded pics:
+    while (newIndex >= 0 &&
+	   (g_file_metadata[newIndex].deleted ||
+	    g_file_metadata[newIndex].uploaded)) {
+	newIndex --;
+    }
+    // Don't go past the en
+    if (newIndex < 0) {
       output("No previous files to preview");
       return;
     }
-    g_fileIndex --;
+    g_fileIndex = newIndex;
     previewFile();
   }
 
@@ -229,6 +261,10 @@ function previewFile() {
         // ctrl - S
         case 83: 
 	  uploadImage();
+	  break;
+        // ctrol -X
+	case 88:
+	  deleteImage();
 	  break;
         }
       }
