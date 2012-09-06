@@ -1,0 +1,14 @@
+<div class="comment_form">
+<form action="/leave-blog-comment.py" method="POST">
+<a name="comment_form" /><h3>${welcome} Leave A Comment:</h3></a>
+<h3 class="error">${errorMsg}</h3>
+<input type="hidden" name="postId" value="${postId}" />
+<input type="hidden" name="returnUrl" value="${returnUrl}" />
+Title:<input type="text" name="title" value="${defaultTitle}" size=32 />
+<br />
+<br />
+<textarea name="message" rows=10 cols=64>${defaultText}</textarea><br />
+${loginFields}
+<input type="submit" value="Leave Comment!!"/>
+</form>
+</div>
