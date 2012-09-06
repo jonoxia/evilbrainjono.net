@@ -25,3 +25,25 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+# Don't track rss files
+*.rss
+
+# Or emacs autosaves
+*~
+
+# Non-version controlled subfolders in my blog directory:
+images
+recordings
+aliensky
+chinese
+minecraft
+multicanvas
+music
+pages
+pencilbox
+pencilbox2
+platformer-dev-backup
+platformer-dev
+platformer
+toybox
