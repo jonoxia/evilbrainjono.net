@@ -158,7 +158,8 @@ def renderMainBlogPage():
             endyear = year
         startDate = datetime.datetime( year, month, 1)
         endDate = datetime.datetime( endyear, endmonth, 1)
-        entries = BlogEntry.select( AND( BlogEntry.q.date >= startDate, BlogEntry.q.date < endDate ) )
+        entries = BlogEntry.select( AND( BlogEntry.q.date >= startDate, BlogEntry.q.date < endDate,
+                                         BlogEntry.q.public == True ) )
         pageContentLinks = "<h4>Articles from %s:</h4><ul>" % startDate.strftime("%B %Y")
     else:
         entries = BlogEntry.select(BlogEntry.q.public == True, orderBy = "-date")[0:POSTS_PER_PAGE]
