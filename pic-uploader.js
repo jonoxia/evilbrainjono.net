@@ -71,8 +71,6 @@ function drawFile(canvas) {
 		metadata.crop = {left: 0, top: 0,
 				 right: Math.floor(img.width * metadata.scale),
 				 bottom: Math.floor(img.height * metadata.scale)};
-
-
 		drawIt(metadata);
 	    };
 	    img.src = e.target.result;
@@ -151,12 +149,37 @@ function restoreText() {
 
 function rotatePreview() {
     var metadata = g_file_metadata[g_fileIndex];
+    // Advance rotation by 90 degrees clockwise.
     metadata.rotation += 1;
     if (metadata.rotation == 4) metadata.rotation = 0;
+    // Reset crop rectangle to enclose whole image at new orientation:
     if (metadata.rotation == 1 || metadata.rotation == 3) {
-	metadata.scale = (600.0 / metadata.height);
+	// Portrait-style crop recangle
+	metadata.crop = {left: 0, top: 0,
+		     right: Math.floor(metadata.height * metadata.scale),
+		     bottom: Math.floor(metadata.width * metadata.scale)};
     } else {
-	metadata.scale = (600.0 / metadata.width);
+	// Landscape-style crop rectangle
+	metadata.crop = {left: 0, top: 0,
+			 right: Math.floor(metadata.width * metadata.scale),
+			 bottom: Math.floor(metadata.height * metadata.scale)};
+    }
+    // change offset to put picture origin in the upper left of canvas.
+    if (metadata.rotation == 1) {
+	metadata.offsetX = -250;
+	metadata.offsetY = -100;
+    }
+    if (metadata.rotation == 2) {
+	metadata.offsetX = -0;
+	metadata.offsetY = -350;
+    }
+    if (metadata.rotation == 3) {
+	metadata.offsetX = 100;
+	metadata.offsetY = -100;
+    }
+    if (metadata.rotation == 0) {
+	metadata.offsetX = 0;
+	metadata.offsetY = 0;
     }
     previewFile();
 }
@@ -300,6 +323,9 @@ function canvasMouseMove(e) {
 	    // shift key drags image
 	    metadata.offsetX += dx;
 	    metadata.offsetY += dy;
+	    console.log("Offset is " + metadata.offsetX +", " + metadata.offsetY);
+	    console.log("size is " + metadata.width +", " + metadata.height);
+	    console.log("scale is " + metadata.scale);
 	} else {
 	    // without shift key, drag crop box:
 	    boxEndPt = {x: e.pageX - offset.left,
