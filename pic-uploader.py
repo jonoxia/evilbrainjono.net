@@ -31,24 +31,33 @@ q = cgi.FieldStorage()
 
 data = q.getfirst("img", "")
 directory = q.getfirst("directory", "")
-filename = q.getfirst("filename", "0")
+file_number = int(q.getfirst("filename", "0"))
 width = q.getfirst("width", "0")
 height = q.getfirst("height", "0")
 caption = q.getfirst("caption", "")
 altText = q.getfirst("altText", "")
 
+# Create directory if it doesn't exist
 dirPath = os.path.join(BASE_PATH, directory)
 if not os.path.exists(dirPath):
   os.mkdir(dirPath)
 
-# Save image to a temporary file, then compress it
-filename = "%s.jpg" % filename
-filePath = os.path.join(dirPath, filename)
+# Save image to a temporary file...
 tempFilePath = os.path.join(dirPath, "tmp.jpg")
-url = "/images/%s/%s" % (directory, filename)
 writeFile(tempFilePath, data)
+
+# Ensure uniqueness of filename within directory:
+filename = "%d.jpg" % file_number
+while os.path.isfile(os.path.join(dirPath, filename)):
+  file_number += 1
+  filename = "%d.jpg" % file_number
+
+# take temp file and compress it to (filename):
+filePath = os.path.join(dirPath, filename)
 compress(tempFilePath, filePath)
 
+# Figure out image relative URL, create HTML to append to post:
+url = "/images/%s/%s" % (directory, filename)
 html = render_template_file("pic.html", {"url": url,
                                    "alt": altText,
                                    "height": height,
