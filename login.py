@@ -67,7 +67,7 @@ def check_login_ok(q):
     if matchingUsers.count() == 0:
         return NO_USER_ERR % username
     if password != matchingUsers[0].password:
-        return PASSWD_WRONG_ERR
+        return PASSWD_WRONG_ERR % username
     set_cookie(q)
 
 def set_cookie(q):
