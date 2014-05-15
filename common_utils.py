@@ -27,6 +27,7 @@ JONOSCRIPT_FEED = "http://jonoscript.wordpress.com/feed/"
 NEED_FIELD_ERR = "You left a required field blank."
 NO_SUCH_USER_ERR = "There is no user by that name."
 WRONG_PASSWORD_ERR = "Password is in the wrong!"
+BANNED_ERR = "You are banned from this site."
 
 
 def getCookie( initialvalues = {} ):

@@ -3,7 +3,6 @@ import re
 import cgi
 import cgitb
 import datetime
-from tweet import updateTwitterStatus
 from common_utils import *
 from model import *
 from blog_config import ADMIN_USERNAME
@@ -83,9 +82,11 @@ def print_original_entry(id):
 
 
 def publicize(q, entry):
+    # TODO set the entry's date to now. If this is an old draft that I'm just
+    # publishing, I want it to show up under its publish date, not its creation
+    # date.
     link = "http://evilbrainjono.net/blog#%d" % entry.id
     doRss = q.getfirst("dorss", "")
-    tweet = q.getfirst("tweet", "")
 
     if doRss == "yes":
         if len(entry.more_words) > 0:
@@ -93,10 +94,7 @@ def publicize(q, entry):
         else:
             message = "\n\n<a href=\"http://www.evilbrainjono.net/blog?showcomments=true#%dc\">Leave a comment</a>" % entry.id
         update_rss( entry.title, entry.words + message, link, RSS_FILE )
-    if tweet == "yes":
-        message = "New blog post: %s %s" % (entry.title, link)
-        if len(message) <= 140:
-            updateTwitterStatus(message)
+
 
 def add_submission(q, username, type):
     words = q.getfirst("message", "")

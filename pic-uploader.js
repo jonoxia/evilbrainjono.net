@@ -227,7 +227,7 @@ function uploadImage() {
         filename: metadata.id,
         directory: picSet,
 	caption: metadata.caption,
-	altText: metadata.altText,
+ 	altText: metadata.altText,
 	width: bbox.width,
 	height: bbox.height,
 	img: dataUrl
@@ -279,7 +279,7 @@ function handleKeypress(e) {
 	    zoomInPreview();
 	    break;
          // ctrl - -
-	case 109:
+	case 109: case 173:
 	    zoomOutPreview();
 	    break;
         // ctrl - S

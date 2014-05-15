@@ -7,6 +7,7 @@ import sys
 import Cookie
 from common_utils import *
 from model import *
+from blog_config import BAN_LIST
 
 LOGIN_PAGE_URL = "/blog-cgi/login.py" # was /cgi-bin/blog/login.cgi
 ALREADY_USER_ERR = """<h2>There is already a user called %s!</h2>
@@ -68,6 +69,8 @@ def check_login_ok(q):
         return NO_USER_ERR % username
     if password != matchingUsers[0].password:
         return PASSWD_WRONG_ERR % username
+    if username in BAN_LIST:
+        return BANNED_ERR
     set_cookie(q)
 
 def set_cookie(q):
@@ -98,15 +101,6 @@ if q.has_key('submission'):
     if q['submission'].value == 'Login':
         error_message = check_login_ok(q)
 
-dict = {"title": "Jono's Natural Login",
-        "navigation": "",
-        "actionlinks": "",
-        "categorylinks": "",
-        "archivelinks": "",
-        "jonoscriptlinks": "",
-        "twitterlinks": ""}
 
-dict["contents"] = render_template_file( "login_form.html", {"error": error_message,
-                                                             "action": "/blog/login"} )
-
-print render_template_file("blog.html", dict )
+print render_template_file( "login_form.html", {"error": error_message,
+                                                "action": "/blog/login"} )

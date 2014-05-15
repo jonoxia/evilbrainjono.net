@@ -71,7 +71,7 @@ def make_action_links(username, q):
         action_links += "<li><a href=\"/blog/login\">Logout</a></li>"
 
     if username == ADMIN_USERNAME:
-        action_links +=  "<li>Welcome back, Jono. <a href=\"blog/new?type=entry\">New entry</a> | <a href=\"/pic-uploader.html\">Pic Upload</a> | <a href=\"\">Drafts</a></li>"
+        action_links +=  "<li>Welcome back, Jono. <a href=\"blog/new?type=entry\">New entry</a> | <a href=\"/pic-uploader.html\">Pic Upload</a> | <a href=\"drafts.py\">Drafts</a></li>"
     elif username:
         action_links += "<li>Hi %s!</li>" % username
 
@@ -125,7 +125,9 @@ def renderMainBlogPage():
     if cookie.has_key("blogin"):
         username = cookie["blogin"].value
     else:
-        username = None
+        print_redirect("login.py")
+        return
+        #username = None
 
     substitution_dict = {"title": "Evil Brain Jono's Natural Log"}
 
